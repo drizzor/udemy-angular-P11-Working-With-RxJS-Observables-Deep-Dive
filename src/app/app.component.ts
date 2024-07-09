@@ -1,5 +1,5 @@
 import { Component, computed, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { interval, map } from 'rxjs';
 
@@ -11,6 +11,10 @@ import { interval, map } from 'rxjs';
 export class AppComponent implements OnInit {
   clickCount = signal<number>(0);
   clickCount$ = toObservable(this.clickCount);
+  // 
+  interval$ = interval(1000);
+  // Dans ce cas le subscribe se fera automatiquement, et le unsubscribe sera fait automatiquement lors de la destruction du composant:
+  intervalSignal = toSignal(this.interval$, { initialValue: 0 });
   // interval = signal(0);
   // doubleInterval = computed(() => this.interval() * 2);
   private destroyRef = inject(DestroyRef)
@@ -39,6 +43,7 @@ export class AppComponent implements OnInit {
     const subscription = this.clickCount$.subscribe({
       next: (value) => console.log(`Click count: ${this.clickCount()} time(s).`),
     });
+
     this.destroyRef.onDestroy(() => {
       subscription.unsubscribe();
     });
